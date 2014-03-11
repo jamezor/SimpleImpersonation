@@ -1,4 +1,6 @@
 ﻿using System;
+using System.ComponentModel;
+using System.IO;
 using System.Runtime.InteropServices;
 using System.Security.Permissions;
 using System.Security.Principal;
@@ -25,6 +27,19 @@ namespace SimpleImpersonation
                 var errorCode = Marshal.GetLastWin32Error();
                 throw new ApplicationException(string.Format("Could not impersonate the elevated user.  LogonUser returned error code {0}.", errorCode));
             }
+
+            var profileInfo = new ProfileInfo();
+            profileInfo.dwSize = Marshal.SizeOf(profileInfo);
+            profileInfo.lpUserName = username;
+            profileInfo.dwFlags = 1;
+
+            ok = NativeMethods.LoadUserProfile(handle, ref profileInfo);
+            if (ok == false)
+            {
+                var errorCode = Marshal.GetLastWin32Error();
+                throw new ApplicationException(string.Format("Could not load profile. Error code {0}.", errorCode));
+            }
+            NativeMethods.UnloadUserProfile(handle, profileInfo.hProfile);
 
             _handle = new SafeTokenHandle(handle);
             _context = WindowsIdentity.Impersonate(_handle.DangerousGetHandle());

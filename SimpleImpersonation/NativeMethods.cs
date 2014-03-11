@@ -15,5 +15,24 @@ namespace SimpleImpersonation
         [SuppressUnmanagedCodeSecurity]
         [return: MarshalAs(UnmanagedType.Bool)]
         internal static extern bool CloseHandle(IntPtr handle);
+
+        [DllImport("userenv.dll", SetLastError = true, CharSet = CharSet.Auto)]
+        public static extern bool LoadUserProfile(IntPtr hToken, ref ProfileInfo lpProfileInfo);
+
+        [DllImport("Userenv.dll", CallingConvention = CallingConvention.Winapi, SetLastError = true, CharSet = CharSet.Auto)]
+        public static extern bool UnloadUserProfile(IntPtr hToken, IntPtr lpProfileInfo);
+    }
+
+    [StructLayout(LayoutKind.Sequential, CharSet = CharSet.Auto)]
+    public struct ProfileInfo
+    {
+        public int dwSize;
+        public int dwFlags;
+        public string lpUserName;
+        public string lpProfilePath;
+        public string lpDefaultPath;
+        public string lpServerName;
+        public string lpPolicyPath;
+        public IntPtr hProfile;
     }
 }
